@@ -1,4 +1,4 @@
-# 现代化知识库管理软件——知了
+# 知识库管理软件——知了
 
 ## 简介
 
@@ -41,7 +41,7 @@
 
 ---
 
-# Modern Knowledge Base Management Software — Knowly
+# Knowledge Base Management Software — Knowly
 
 ## Introduction
 
