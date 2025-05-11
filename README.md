@@ -10,7 +10,7 @@
   采用创新的数据存储方式，所有知识内容都可存储于单一文件中，无需复杂的分库分表，极大简化部署与迁移，查询与筛选性能优越。
 
 - **全平台支持**  
-  支持移动端（iOS/Android）与桌面端（Windows/Mac/Linux）同步使用，随时随地记录与查找知识，真正实现“人人可用”。
+  支持移动端（iOS/Android）与桌面端（Windows/Mac/Linux）同步使用，随时随地记录与查找知识，真正实现"人人可用"。
 
 - **多数据结构兼容**  
   兼容多种数据类型与结构，包括文本、Markdown、表格、图片、PDF、音频等，满足不同场景下的知识管理需求。
@@ -45,7 +45,7 @@
 
 ## Introduction
 
-**Knowly** is a modern knowledge base management software designed for individuals. It aims to provide an efficient, convenient, and intelligent experience for storing and managing all types of knowledge. Whether it’s text, tables, images, documents, or structured, semi-structured, or unstructured data, Knowly helps you manage everything with ease, empowering everyone to become a highly efficient knowledge worker.
+**Knowly** is a modern knowledge base management software designed for individuals. It aims to provide an efficient, convenient, and intelligent experience for storing and managing all types of knowledge. Whether it's text, tables, images, documents, or structured, semi-structured, or unstructured data, Knowly helps you manage everything with ease, empowering everyone to become a highly efficient knowledge worker.
 
 ## Key Features
 
@@ -81,3 +81,73 @@
 ## Contribution & Feedback
 
 We welcome suggestions and feedback, and invite you to join us in development and maintenance!
+
+# 文档智能处理系统
+
+这是一个基于FastAPI和Gradio构建的文档智能处理系统，支持文档上传、向量化和智能检索功能。
+
+## 功能特点
+
+1. 文档上传
+   - 支持上传docx和txt格式的文档
+   - 自动进行文本提取和向量化
+   - 文件名作为唯一标识，重复上传会提示覆盖
+
+2. 文档管理
+   - 查看已上传文档列表
+   - 支持删除文档及其向量索引
+
+3. 智能检索
+   - 支持自然语言问题检索
+   - 可调节相似度阈值和召回数量
+   - 显示检索结果及其相似度分数
+
+## 安装说明
+
+1. 克隆项目并安装依赖：
+```bash
+git clone [项目地址]
+cd [项目目录]
+pip install -r requirements.txt
+```
+
+2. 启动服务：
+```bash
+python main.py
+```
+
+3. 访问系统：
+   - 打开浏览器访问 http://localhost:8000
+   - 文档管理界面：http://localhost:8000/documents
+
+## 使用说明
+
+1. 文档上传
+   - 点击"文档上传"标签页
+   - 选择要上传的docx或txt文件
+   - 点击"上传并处理"按钮
+   - 等待处理完成
+
+2. 文档管理
+   - 在"已上传文档"下拉列表中选择要删除的文档
+   - 点击"删除选中文档"按钮进行删除
+
+3. 文档检索
+   - 点击"文档检索"标签页
+   - 在输入框中输入检索问题
+   - 调整相似度阈值和召回数量（可选）
+   - 点击"检索"按钮获取结果
+
+## 技术栈
+
+- FastAPI：后端框架
+- Gradio：Web界面
+- LangChain：文档处理
+- FAISS：向量存储
+- Sentence-Transformers：文本向量化
+
+## 注意事项
+
+1. 确保上传的文档格式正确（docx或txt）
+2. 文档处理可能需要一定时间，请耐心等待
+3. 建议定期清理不需要的文档以节省存储空间

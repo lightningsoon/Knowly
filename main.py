@@ -6,6 +6,9 @@ from html_string import main_html,plain_html
 from upload_file import *
 from create_kb_unique import *
 from chat import get_model_response,list_files_in_index
+from document_interface import get_document_block
+from document_processor import app as doc_app
+
 def user(user_message, history):
     print(user_message)
     return {'text': '','files': user_message['files']}, history + [[user_message['text'], None]]
@@ -105,6 +108,8 @@ def get_knowledge_base_block():
     return knowledge
 
 app = FastAPI()
+app.mount("/api/doc", doc_app)  # 挂载文档处理API
+
 @app.get("/", response_class=HTMLResponse)
 def read_main():
     html_content = main_html
@@ -136,3 +141,4 @@ async def query_endpoint(prompt,db_name,similarity_threshold=0.35,chunk_cnt=20):
 app = gr.mount_gradio_app(app, get_chat_block(), path="/chat")
 app = gr.mount_gradio_app(app, get_upload_block(), path="/upload_data")
 app = gr.mount_gradio_app(app, get_knowledge_base_block(), path="/create_knowledge_base")
+app = gr.mount_gradio_app(app, get_document_block(), path="/documents")
