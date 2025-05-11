@@ -1,0 +1,11 @@
+# custom
+VectorStore/*
+1.json
+1.md
+test_bailian.sh
+# Python
+__pycache__/
+
+
+
+File/.DS_Store
