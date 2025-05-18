@@ -1,7 +1,7 @@
 import gradio as gr
 import requests
 from typing import List, Dict
-
+import random
 def get_doc_page():
     def upload_file(file):
             if file is None:
@@ -28,9 +28,7 @@ def get_doc_page():
         except Exception as e:
             return f"处理失败: {str(e)}"
     
-    def refresh_list(request: gr.Request = None):
-        if request is None:
-            return []
+    def refresh_list():
         try:
             response = requests.get("http://localhost:8008/api/doc/list")
             if response.status_code == 200:
@@ -46,7 +44,8 @@ def get_doc_page():
         except Exception as e:
             print("获取文档列表失败",e)
             return []
-    
+    # def refresh_list():
+    #     return random.sample(['1','2','3'],2)
     def delete_file(selected_doc):
         try:
             if not selected_doc:
