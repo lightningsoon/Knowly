@@ -14,14 +14,16 @@ class DocumentData:
         os.makedirs(self.temp_path, exist_ok=True)
         os.makedirs(self.file_path, exist_ok=True)
     
-    def save_document(self, file_path: str, file_name: str) -> bool:
+    def save_document(self, file_path: str, file_name: str) -> (bool, str):
         """保存文档"""
         try:
             target_path = os.path.join(self.file_path, file_name)
+            if os.path.exists(target_path):
+                return False, f"同名字的文件已存在"
             shutil.copy2(file_path, target_path)
-            return True
-        except Exception:
-            return False
+            return True, "保存成功"
+        except Exception as e:
+            return False, f"保存失败: {str(e)}"
     
     def get_document_path(self, file_name: str) -> Optional[str]:
         """获取文档路径"""
@@ -48,9 +50,10 @@ class DocumentData:
             return False
     
     def list_documents(self) -> List[str]:
-        """列出所有文档"""
+        """列出所有文档（排除隐藏文件）"""
         try:
-            return [f for f in os.listdir(self.file_path) if os.path.isfile(os.path.join(self.file_path, f))]
+            return [f for f in os.listdir(self.file_path)
+                    if os.path.isfile(os.path.join(self.file_path, f)) and not f.startswith('.')]
         except Exception:
             return []
     

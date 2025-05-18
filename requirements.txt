@@ -8,3 +8,7 @@ docx2txt==0.8
 python-docx==1.0.1
 numpy==1.26.4
 pandas==2.2.0
+llama-index-core>=0.10.0
+llama-index-embeddings-dashscope>=0.1.0
+llama-index-postprocessor-dashscope>=0.1.0
+dashscope>=1.13.0
