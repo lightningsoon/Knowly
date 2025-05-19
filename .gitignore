@@ -6,3 +6,4 @@ __pycache__/
 File/.DS_Store
 File/*
 start.sh
+test_*.py
