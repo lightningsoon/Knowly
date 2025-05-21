@@ -2,14 +2,14 @@ import gradio as gr
 import requests
 from typing import List, Dict
 import random
+import os
 def get_doc_page():
     def upload_file(file):
             if file is None:
                 return "请选择要上传的文件"
-            
             try:
                 with open(file.name, "rb") as f:
-                    files = {"file": (file.name, f)}
+                    files = {"file": (os.path.basename(file.name), f)}
                     response = requests.post("http://localhost:8008/api/doc/upload", files=files)
                     if response.status_code == 200:
                         return response.json()["message"]
@@ -102,7 +102,7 @@ def get_doc_page():
         with gr.Group():
             doc_dropdown = gr.Dropdown(
                 info="选择要处理的文档",
-                choices=refresh_list(),
+                choices=[],
                 label="文档列表",
                 multiselect=False,
                 allow_custom_value=True,interactive=True
@@ -122,9 +122,9 @@ def get_doc_page():
         
         # 绑定事件
         upload_btn.click(upload_file, inputs=[file_input], outputs=[upload_output])
-        process_btn.click(process_file, inputs=[doc_dropdown], outputs=[upload_output])
+        process_btn.click(process_file, inputs=[file_input], outputs=[upload_output])
         refresh_btn.click(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
-        delete_btn.click(delete_file, inputs=[doc_dropdown], outputs=[delete_output])
+        delete_btn.click(delete_file, inputs=[doc_dropdown], outputs=[delete_output]).then(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
         search_btn.click(search_docs, inputs=[search_input], outputs=[search_output])
         
         doc_page.load(fn=lambda :gr.update(choices=refresh_list()),inputs=[],outputs=[doc_dropdown])

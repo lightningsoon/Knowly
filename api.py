@@ -32,13 +32,14 @@ async def upload_document(file: UploadFile = File(...)) -> JSONResponse:
             raise HTTPException(status_code=400, detail="只支持 .txt 和 .docx 格式的文件")
         
         # 保存上传的文件
-        temp_file_path = os.path.join(controller.temp_path, file.filename)
+        base_name = os.path.basename(file.filename)
+        temp_file_path = os.path.join(controller.temp_path, base_name)
         with open(temp_file_path, "wb") as f:
             content = await file.read()
             f.write(content)
         
         # 保存文档
-        success, msg = controller.data.save_document(temp_file_path, file.filename)
+        success, msg = controller.data.save_document(temp_file_path, base_name)
         if not success:
             raise HTTPException(status_code=400, detail=msg)
         
@@ -48,7 +49,7 @@ async def upload_document(file: UploadFile = File(...)) -> JSONResponse:
         
         return JSONResponse(content={
             "success": True,
-            "message": f"文档 '{os.path.splitext(file.filename)[0]}' 上传成功"
+            "message": f"文档 '{os.path.basename(file.filename)}' 上传成功"
         })
     except HTTPException as e:
         raise e

@@ -14,7 +14,7 @@ class DocumentData:
         os.makedirs(self.temp_path, exist_ok=True)
         os.makedirs(self.file_path, exist_ok=True)
     
-    def save_document(self, file_path: str, file_name: str) -> (bool, str):
+    def save_document(self, file_path: str, file_name: str) :
         """保存文档"""
         try:
             target_path = os.path.join(self.file_path, file_name)
