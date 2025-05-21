@@ -91,14 +91,12 @@ def get_doc_page():
         gr.Markdown("# 知了——知识库管理系统\n 此处应有一些介绍。")
         
         # 文档管理部分
-        gr.Markdown("## 上传")
+        gr.Markdown("## 第一步：上传")
         with gr.Group():
             file_input = gr.File(label="上传文档")
-            with gr.Row():
-                upload_btn = gr.Button("上传")
-                process_btn = gr.Button("处理")
+            upload_btn = gr.Button("上传")
             upload_output = gr.Textbox(label="操作结果")
-        gr.Markdown("## 删除")
+        gr.Markdown("## 第二步：加工")
         with gr.Group():
             doc_dropdown = gr.Dropdown(
                 info="选择要处理的文档",
@@ -107,9 +105,10 @@ def get_doc_page():
                 multiselect=False,
                 allow_custom_value=True,interactive=True
             )
-            refresh_btn = gr.Button("刷新列表")
-            delete_btn = gr.Button("删除选中文档")
-            delete_output = gr.Textbox(label="删除结果")
+            refresh_btn = gr.Button("刷新")
+            process_btn = gr.Button("处理")
+            delete_btn = gr.Button("删除")
+            process_output = gr.Textbox(label="操作结果")
         
         # 文档检索部分
         gr.Markdown("## 文档检索")
@@ -122,9 +121,9 @@ def get_doc_page():
         
         # 绑定事件
         upload_btn.click(upload_file, inputs=[file_input], outputs=[upload_output])
-        process_btn.click(process_file, inputs=[file_input], outputs=[upload_output])
         refresh_btn.click(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
-        delete_btn.click(delete_file, inputs=[doc_dropdown], outputs=[delete_output]).then(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
+        process_btn.click(process_file, inputs=[doc_dropdown], outputs=[process_output])
+        delete_btn.click(delete_file, inputs=[doc_dropdown], outputs=[process_output]).then(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
         search_btn.click(search_docs, inputs=[search_input], outputs=[search_output])
         
         doc_page.load(fn=lambda :gr.update(choices=refresh_list()),inputs=[],outputs=[doc_dropdown])

@@ -35,15 +35,7 @@ class DocumentController:
         try:
             file_name = os.path.basename(file_path)
             db_name = os.path.splitext(file_name)[0]
-            
-            # 保存文档
-            # success, msg = self.data.save_document(file_path, file_name)
-            # if not success:
-            #     return {
-            #         "success": False,
-            #         "message": msg
-            #     }
-            
+       
             # 使用llama-index处理文档
             try:
                 # 读取文档
