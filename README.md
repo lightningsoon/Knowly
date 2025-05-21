@@ -1,5 +1,7 @@
 # 知识库管理软件——知了
 
+![管理界面](/images/admin.jpg)
+
 ## 简介
 
 **知了** 是一款面向个人的现代化知识库管理软件，致力于为用户提供高效、便捷、智能的知识存储与管理体验。无论是文本、表格、图片、文档，还是结构化、半结构化、非结构化数据，都能轻松管理，助力每个人成为高效的知识工作者。
@@ -29,7 +31,7 @@
 - 代码片段与技术文档管理
 - 为大模型（如 LLM）提供个性化数据，提升智能问答与辅助决策能力
 
-## 快速开始
+## 使用方式
 
 1. 打开知了的网页或小程序
 2. 创建或导入你的知识库文件
@@ -38,6 +40,245 @@
 ## 贡献与反馈
 
 欢迎提出建议和反馈，也欢迎加入开发和维护！
+
+
+## 安装说明
+### 安装前准备
+
+去[阿里云百炼](https://bailian.console.aliyun.com/?spm=5176.29597918.J_SEsSjsNv72yRuRFS2VknO.2.72ac7b08diFZe7&tab=model#/efm/model_experience_center/text)获取api-key，需要用到embedding模型接口。
+
+1. 克隆项目并安装依赖：
+```bash
+git clone [项目地址]
+cd [项目目录]
+pip install -r requirements.txt
+```
+
+2. 启动服务：
+```bash
+export DASHSCOPE_API_KEY="填你的阿里云百炼api-key"
+python main.py
+```
+
+3. 访问系统：
+   - 打开浏览器访问 http://localhost:8000
+   - 部署在服务器上 http://<你的ip地址>:8000
+
+## 使用说明
+
+1. 文档上传
+   - 点击"文档上传"标签页
+   - 选择要上传的docx或txt文件
+   - 点击"上传并处理"按钮
+   - 等待处理完成
+
+2. 文档管理
+   - 在"已上传文档"下拉列表中选择要删除的文档
+   - 点击"删除选中文档"按钮进行删除
+
+3. 文档检索
+   - 点击"文档检索"标签页
+   - 在输入框中输入检索问题
+   - 调整相似度阈值和召回数量（可选）
+   - 点击"检索"按钮获取结果
+
+## 注意事项
+
+1. 确保上传的文档格式正确（docx或txt）
+2. 文档处理可能需要一定时间，请耐心等待
+3. 建议定期清理不需要的文档以节省存储空间
+### 接口文档
+访问 `http://localhost:8000/docs` 查看Swagger文档
+
+
+# API 文档
+所有API接口均以 `/api/doc` 为基础路径。
+
+## API端点
+
+| 方法   | 路径        | 功能                |
+|--------|-------------|---------------------|
+| POST   | /upload     | 文件上传            |
+| GET    | /documents  | 获取文档列表        |
+| DELETE | /documents  | 删除指定文档        |
+| POST   | /query      | 执行文档检索        |
+| GET    | /health     | 服务健康检查        |
+
+## 测试脚本
+```bash
+# 执行自动化测试
+chmod +x test_api.sh
+./test_api.sh
+```
+
+
+
+## 1. 上传文档
+
+- **URL**: `/upload`
+- **Method**: `POST`
+- **Content-Type**: `multipart/form-data`
+- **参数**:
+    - `file`: 上传的文件 (类型: `UploadFile`, 支持 `.txt`, `.docx`)
+- **成功响应 (200)**:
+  ```json
+  {
+    "success": true,
+    "message": "文档 '文件名' 上传成功"
+  }
+  ```
+- **失败响应 (400/500)**:
+  ```json
+  {
+    "detail": "错误信息"
+  }
+  ```
+
+## 2. 处理文档（切片和向量化）
+
+- **URL**: `/process/{file_name}`
+- **Method**: `POST`
+- **Content-Type**: `application/json`
+- **路径参数**:
+    - `file_name`: 要处理的文件名 (string)
+- **请求体参数**:
+    - `chunk_size`: 分块长度 (integer, 默认: 50)
+    - `separator`: 分割符号 (string, 默认: "\n")
+- **成功响应 (200)**:
+  ```json
+  {
+    "success": true,
+    "message": "文档 '文件名' 处理成功"
+  }
+  ```
+- **失败响应 (400/404/500)**:
+  ```json
+  {
+    "detail": "错误信息"
+  }
+  ```
+
+## 3. 删除文档
+
+- **URL**: `/delete/{file_name}`
+- **Method**: `DELETE`
+- **路径参数**:
+    - `file_name`: 要删除的文件名 (string)
+- **成功响应 (200)**:
+  ```json
+  {
+    "success": true,
+    "message": "文档 '文件名' 删除成功"
+  }
+  ```
+- **失败响应 (400/404/500)**:
+  ```json
+  {
+    "detail": "错误信息"
+  }
+  ```
+
+## 4. 搜索所有文档
+
+- **URL**: `/search`
+- **Method**: `GET`
+- **查询参数**:
+    - `query`: 搜索查询 (string, 必选)
+    - `similarity_threshold`: 相似度阈值 (float, 默认: 0.2)
+    - `top_k`: 返回结果数量 (integer, 默认: 5)
+- **成功响应 (200)**:
+  ```json
+  {
+    "success": true,
+    "results": [
+      {
+        "file_name": "文档名",
+        "similarity": 0.85,
+        "content": "相关内容片段..."
+      }
+      // ...更多结果
+    ]
+  }
+  ```
+- **失败响应 (400/500)**:
+  ```json
+  {
+    "detail": "错误信息"
+  }
+  ```
+
+## 5. 列出所有文档
+
+- **URL**: `/list`
+- **Method**: `GET`
+- **成功响应 (200)**:
+  ```json
+  {
+    "success": true,
+    "documents": ["文件名1.txt", "文件名2.docx"]
+  }
+  ```
+- **失败响应 (500)**:
+  ```json
+  {
+    "detail": "错误信息"
+  }
+  ```
+
+## 6. 定向单文件检索
+
+- **URL**: `/query`
+- **Method**: `POST`
+- **Content-Type**: `application/json`
+- **请求体参数**:
+    - `prompt`: 检索内容 (string, 必选)
+    - `db_name`: 文件名 (string, 必选, 不带后缀，作为知识库名)
+    - `similarity_threshold`: 相似度阈值 (float, 默认: 0.2)
+    - `chunk_cnt`: 返回结果数量 (integer, 默认: 5)
+- **成功响应 (200)**:
+  ```json
+  {
+    "success": true,
+    "results": [
+      {
+        "file_name": "文档名",
+        "similarity": 0.85,
+        "content": "相关内容片段..."
+      }
+      // ...更多结果
+    ]
+  }
+  ```
+- **失败响应 (400/500)**:
+  ```json
+  {
+    "detail": "错误信息"
+  }
+  ```
+
+
+
+## 项目结构
+```
+.
+├── api.py         # FastAPI接口
+├── gui.py         # Gradio界面
+├── control.py     # 业务逻辑控制
+├── data.py        # 数据层操作
+├── main.py        # 服务入口
+└── test_api.sh    # API测试脚本
+```
+
+## 常见问题
+
+Q: 文件上传失败提示文件已存在？
+A: 系统禁止重复上传同名文件，请先删除旧版本
+
+Q: 服务无法正常关闭？
+A: 使用Ctrl+C关闭后等待5秒强制终止
+
+Q: 文档列表不更新？
+A: 点击刷新按钮或切换分页触发更新
 
 ---
 
@@ -81,73 +322,3 @@
 ## Contribution & Feedback
 
 We welcome suggestions and feedback, and invite you to join us in development and maintenance!
-
-# 文档智能处理系统
-
-这是一个基于FastAPI和Gradio构建的文档智能处理系统，支持文档上传、向量化和智能检索功能。
-
-## 功能特点
-
-1. 文档上传
-   - 支持上传docx和txt格式的文档
-   - 自动进行文本提取和向量化
-   - 文件名作为唯一标识，重复上传会提示覆盖
-
-2. 文档管理
-   - 查看已上传文档列表
-   - 支持删除文档及其向量索引
-
-3. 智能检索
-   - 支持自然语言问题检索
-   - 可调节相似度阈值和召回数量
-   - 显示检索结果及其相似度分数
-
-## 安装说明
-
-1. 克隆项目并安装依赖：
-```bash
-git clone [项目地址]
-cd [项目目录]
-pip install -r requirements.txt
-```
-
-2. 启动服务：
-```bash
-python main.py
-```
-
-3. 访问系统：
-   - 打开浏览器访问 http://localhost:8000
-   - 文档管理界面：http://localhost:8000/documents
-
-## 使用说明
-
-1. 文档上传
-   - 点击"文档上传"标签页
-   - 选择要上传的docx或txt文件
-   - 点击"上传并处理"按钮
-   - 等待处理完成
-
-2. 文档管理
-   - 在"已上传文档"下拉列表中选择要删除的文档
-   - 点击"删除选中文档"按钮进行删除
-
-3. 文档检索
-   - 点击"文档检索"标签页
-   - 在输入框中输入检索问题
-   - 调整相似度阈值和召回数量（可选）
-   - 点击"检索"按钮获取结果
-
-## 技术栈
-
-- FastAPI：后端框架
-- Gradio：Web界面
-- LangChain：文档处理
-- FAISS：向量存储
-- Sentence-Transformers：文本向量化
-
-## 注意事项
-
-1. 确保上传的文档格式正确（docx或txt）
-2. 文档处理可能需要一定时间，请耐心等待
-3. 建议定期清理不需要的文档以节省存储空间

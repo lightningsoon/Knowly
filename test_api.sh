@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 配置
-API_URL="http://8.147.108.7:8008/api/doc"
+API_URL="http://localhost:8008/api/doc"
 TEST_FILE="./测试数据/README.AI产品说明书.docx"
 
 echo "1. 测试上传接口"
