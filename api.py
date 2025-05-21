@@ -28,28 +28,23 @@ async def upload_document(file: UploadFile = File(...)) -> JSONResponse:
     """
     try:
         # 检查文件类型
-        if not file.filename.endswith(('.txt', '.docx')):
+        if not file.filename.endswith((".txt", ".docx")):
             raise HTTPException(status_code=400, detail="只支持 .txt 和 .docx 格式的文件")
         
-        # 保存上传的文件
+        # 直接保存上传的文件内容
         base_name = os.path.basename(file.filename)
-        temp_file_path = os.path.join(controller.temp_path, base_name)
-        with open(temp_file_path, "wb") as f:
+        file_path = os.path.join(controller.data.file_path, base_name)
+        with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
         
-        # 保存文档
-        success, msg = controller.data.save_document(temp_file_path, base_name)
-        if not success:
-            raise HTTPException(status_code=400, detail=msg)
-        
-        # 清理临时文件
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+        # 检查保存结果
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=400, detail="保存文档失败")
         
         return JSONResponse(content={
             "success": True,
-            "message": f"文档 '{os.path.basename(file.filename)}' 上传成功"
+            "message": f"文档 '{os.path.splitext(file.filename)[0]}' 上传成功"
         })
     except HTTPException as e:
         raise e
@@ -57,33 +52,27 @@ async def upload_document(file: UploadFile = File(...)) -> JSONResponse:
         raise HTTPException(status_code=500, detail=f"上传失败: {str(e)}")
 
 @app.post("/process/{file_name}")
-async def process_document(file_name: str) -> JSONResponse:
+async def process_document(file_name: str, chunk_size: int = Body(50), separator: str = Body("\n")) -> JSONResponse:
     """处理文档（切片和向量化）
-    
     参数:
         file_name: 要处理的文件名
-        
+        chunk_size: 分块长度
+        separator: 分割符号
     返回:
         JSONResponse: 包含处理结果的响应
     """
     try:
-        # 检查文件是否存在
         file_path = controller.data.get_document_path(file_name)
         if not file_path:
             raise HTTPException(status_code=404, detail=f"文件 '{file_name}' 不存在")
-        
-        # 处理文档
-        result = controller.process_document(file_path)
-        
+        result = controller.process_document(file_path, chunk_size, separator)
         if not result["success"]:
             raise HTTPException(status_code=400, detail=result["message"])
-        
         return JSONResponse(content=result)
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"处理失败: {str(e)}")
-
 @app.delete("/delete/{file_name}")
 async def delete_document(file_name: str) -> JSONResponse:
     """删除文档
@@ -115,7 +104,7 @@ async def search_documents(
     similarity_threshold: float = 0.2,
     top_k: int = 5
 ) -> JSONResponse:
-    """搜索文档
+    """搜索所有文档
     
     参数:
         query: 搜索查询

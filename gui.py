@@ -18,11 +18,11 @@ def get_doc_page():
             except Exception as e:
                 return f"上传失败: {str(e)}"
         
-    def process_file(selected_doc):
+    def process_file(selected_doc, chunk_size, separator):
         try:
             if not selected_doc:
                 return "请先选择要处理的文档"
-            response = requests.post(f"http://localhost:8008/api/doc/process/{selected_doc}")
+            response = requests.post(f"http://localhost:8008/api/doc/process/{selected_doc}", json={"chunk_size": chunk_size, "separator": separator})
             if response.status_code == 200:
                 return response.json()["message"]
             return f"处理失败: {response.text}"
@@ -106,13 +106,17 @@ def get_doc_page():
                 multiselect=False,
                 allow_custom_value=True,interactive=True
             )
+
             refresh_btn = gr.Button("刷新")
+            with gr.Row():
+                chunk_size_slider = gr.Slider(label="处理参数：分块长度", minimum=200, maximum=1000, step=1, value=500)
+                separator_input = gr.Textbox(label="处理参数：分隔符号", value="\\n\\n\\n", max_lines=1)
             process_btn = gr.Button("处理")
             delete_btn = gr.Button("删除")
             process_output = gr.Textbox(label="操作结果")
         
         # 文档检索部分
-        gr.Markdown("## 文档检索")
+        gr.Markdown("## 第三步 文档检索")
         with gr.Group():
             search_input = gr.Textbox(label="检索内容")
             with gr.Row():
@@ -126,7 +130,7 @@ def get_doc_page():
         # 绑定事件
         upload_btn.click(upload_file, inputs=[file_input], outputs=[upload_output])
         refresh_btn.click(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
-        process_btn.click(process_file, inputs=[doc_dropdown], outputs=[process_output])
+        process_btn.click(process_file, inputs=[doc_dropdown, chunk_size_slider, separator_input], outputs=[process_output])
         delete_btn.click(delete_file, inputs=[doc_dropdown], outputs=[process_output]).then(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
         search_btn.click(search_docs, inputs=[search_input, doc_dropdown, similarity_input, topk_input], outputs=[search_output_json, search_output_text])
         

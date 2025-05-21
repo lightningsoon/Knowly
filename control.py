@@ -13,6 +13,8 @@ from llama_index.embeddings.dashscope import (
     DashScopeTextEmbeddingModels,
     DashScopeTextEmbeddingType,
 )
+from llama_index.core.node_parser import SentenceSplitter
+
 from llama_index.postprocessor.dashscope_rerank import DashScopeRerank
 
 # 设置嵌入模型
@@ -29,41 +31,41 @@ class DocumentController:
         self.data = DocumentData()
         os.makedirs(self.db_path, exist_ok=True)
         os.makedirs(self.temp_path, exist_ok=True)
+
     
-    def process_document(self, file_path: str) -> Dict:
+    def process_document(self, file_path: str, chunk_size: int = 50, separator: str = "\n") -> Dict:
         """处理文档，包括文本提取和向量化"""
         try:
             file_name = os.path.basename(file_path)
             db_name = os.path.splitext(file_name)[0]
-       
-            # 使用llama-index处理文档
+            # success, msg = self.data.save_document(file_path, file_name)
+            # if not success:
+            #     return {
+            #         "success": False,
+            #         "message": msg
+            #     }
             try:
-                # 读取文档
+                splitter = SentenceSplitter(
+                    separator=separator,
+                    chunk_size=chunk_size,
+                    chunk_overlap=chunk_size//3
+                )
                 documents = SimpleDirectoryReader(input_files=[file_path]).load_data()
-                
-                # 创建索引
-                index = VectorStoreIndex.from_documents(documents)
-                
-                # 保存向量存储
+                index = VectorStoreIndex.from_documents(documents, transformations=[splitter])
                 db_path = os.path.join(self.db_path, db_name)
-                # 如果向量库已存在，先删除再创建
                 if os.path.exists(db_path):
                     shutil.rmtree(db_path)
-                
                 os.makedirs(db_path, exist_ok=True)
                 index.storage_context.persist(persist_dir=db_path)
-                
                 return {
                     "success": True,
                     "message": f"文档 '{db_name}' 处理成功"
                 }
             except Exception as e:
-                # 报告错误
                 return {
                     "success": False,
                     "message": f"向量化失败: {str(e)}"
                 }
-            
         except Exception as e:
             return {
                 "success": False,
