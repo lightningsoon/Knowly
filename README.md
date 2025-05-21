@@ -95,20 +95,6 @@ docker run -d \
    - 本地访问: http://localhost:8000
    - 服务器部署: http://<你的ip地址>:8000
 
-### 手动安装（可选）
-
-1. 克隆项目并安装依赖：
-```bash
-git clone [项目地址]
-cd [项目目录]
-pip install -r requirements.txt
-```
-
-2. 启动服务：
-```bash
-export DASHSCOPE_API_KEY="填你的阿里云百炼api-key"
-python main.py
-```
 
 ### Docker Compose（多服务部署）
 
