@@ -3,6 +3,7 @@ import requests
 from typing import List, Dict
 import random
 import os
+import json
 def get_doc_page():
     def upload_file(file):
             if file is None:
@@ -57,33 +58,33 @@ def get_doc_page():
         except Exception as e:
             return f"删除失败: {str(e)}"
     
-    def search_docs(query):
+    def search_docs(query, db_name, similarity_threshold, chunk_cnt):
         if not query:
-            return "请输入检索内容"
-        
+            return gr.update(visible=False), gr.update(value="请输入检索内容", visible=True)
+        if not db_name:
+            return gr.update(visible=False), gr.update(value="请选择要检索的文档", visible=True)
+        db_name = os.path.splitext(db_name)[0]
         try:
-            response = requests.get(
-                "http://localhost:8008/api/doc/search",
-                params={"query": query}
+            response = requests.post(
+                "http://localhost:8008/api/doc/query",
+                json={
+                    "prompt": query,
+                    "db_name": db_name,
+                    "similarity_threshold": similarity_threshold,
+                    "chunk_cnt": chunk_cnt
+                }
             )
             if response.status_code == 200:
                 data = response.json()
                 if data["success"]:
                     results = data["results"]
                     if not results:
-                        return "未找到相关内容"
-                    
-                    output = []
-                    for result in results:
-                        output.append(f"文档: {result['file_name']}")
-                        output.append(f"相似度: {result['similarity']:.2f}")
-                        output.append(f"内容: {result['content']}")
-                        output.append("---")
-                    return "\n".join(output)
-                return data["message"]
-            return f"检索失败: {response.text}"
+                        return gr.update(visible=False), gr.update(value="未找到相关内容", visible=True)
+                    return gr.update(value=json.dumps(results, ensure_ascii=False, indent=2), visible=True), gr.update(visible=False)
+                return gr.update(visible=False), gr.update(value=data["message"], visible=True)
+            return gr.update(visible=False), gr.update(value=f"检索失败: {response.text}", visible=True)
         except Exception as e:
-            return f"检索失败: {str(e)}"
+            return gr.update(visible=False), gr.update(value=f"检索失败: {str(e)}", visible=True)
             
 
 
@@ -114,9 +115,12 @@ def get_doc_page():
         gr.Markdown("## 文档检索")
         with gr.Group():
             search_input = gr.Textbox(label="检索内容")
+            with gr.Row():
+                similarity_input = gr.Slider(label="相似度阈值", minimum=0, maximum=1, step=0.01, value=0.4)
+                topk_input = gr.Number(label="返回条数", value=5, step=1, minimum=1)
             search_btn = gr.Button("检索")
-            search_output = gr.Textbox(label="检索结果", lines=10)
-        
+            search_output_json = gr.Code(label="检索结果", language="json", lines=10, visible=False)
+            search_output_text = gr.Textbox(label="检索结果", lines=10, visible=True)
         
         
         # 绑定事件
@@ -124,7 +128,7 @@ def get_doc_page():
         refresh_btn.click(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
         process_btn.click(process_file, inputs=[doc_dropdown], outputs=[process_output])
         delete_btn.click(delete_file, inputs=[doc_dropdown], outputs=[process_output]).then(fn=lambda :gr.update(choices=refresh_list()),outputs=[doc_dropdown])
-        search_btn.click(search_docs, inputs=[search_input], outputs=[search_output])
+        search_btn.click(search_docs, inputs=[search_input, doc_dropdown, similarity_input, topk_input], outputs=[search_output_json, search_output_text])
         
         doc_page.load(fn=lambda :gr.update(choices=refresh_list()),inputs=[],outputs=[doc_dropdown])
     return doc_page 
