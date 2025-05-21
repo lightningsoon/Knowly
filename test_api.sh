@@ -2,7 +2,7 @@
 
 # 配置
 API_URL="http://localhost:8008/api/doc"
-TEST_FILE="./测试数据/README.AI产品说明书.docx"
+TEST_FILE="./test_data/README.AI产品说明书.docx"
 
 echo "1. 测试上传接口"
 curl -F "file=@$TEST_FILE" "$API_URL/upload"
