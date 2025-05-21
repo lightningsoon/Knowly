@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  knowly:
+    build: .
+    container_name: knowly
+    ports:
+      - "8000:8000"
+    environment:
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+    volumes:
+      - ./File:/app/File
+      - ./temp_files:/app/temp_files
+      - ./VectorStore:/app/VectorStore
+    restart: unless-stopped
+    networks:
+      - knowly-network
+
+networks:
+  knowly-network:
+    driver: bridge 

@@ -47,6 +47,8 @@
 
 去[阿里云百炼](https://bailian.console.aliyun.com/?spm=5176.29597918.J_SEsSjsNv72yRuRFS2VknO.2.72ac7b08diFZe7&tab=model#/efm/model_experience_center/text)获取api-key，需要用到embedding模型接口。
 
+### 常规安装
+
 1. 克隆项目并安装依赖：
 ```bash
 git clone [项目地址]
@@ -61,8 +63,90 @@ python main.py
 ```
 
 3. 访问系统：
-   - 打开浏览器访问 http://localhost:8000
-   - 部署在服务器上 http://<你的ip地址>:8000
+   - 本地访问: http://localhost:8000
+   - 服务器部署: http://<你的ip地址>:8000
+
+### Docker 安装（未测试）
+
+1. 克隆项目:
+```bash
+git clone [项目地址]
+cd [项目目录]
+```
+
+2. 构建Docker镜像:
+```bash
+docker build -t knowly .
+```
+
+3. 运行Docker容器:
+```bash
+docker run -d \
+  --name knowly \
+  -p 8000:8000 \
+  -e DASHSCOPE_API_KEY="填你的阿里云百炼api-key" \
+  -v $(pwd)/File:/app/File \
+  -v $(pwd)/temp_files:/app/temp_files \
+  -v $(pwd)/VectorStore:/app/VectorStore \
+  knowly
+```
+
+4. 访问系统：
+   - 本地访问: http://localhost:8000
+   - 服务器部署: http://<你的ip地址>:8000
+
+### 手动安装（可选）
+
+1. 克隆项目并安装依赖：
+```bash
+git clone [项目地址]
+cd [项目目录]
+pip install -r requirements.txt
+```
+
+2. 启动服务：
+```bash
+export DASHSCOPE_API_KEY="填你的阿里云百炼api-key"
+python main.py
+```
+
+### Docker Compose（多服务部署）
+
+如果您需要与其他服务一起部署，可以使用Docker Compose:
+
+1. 创建环境变量文件:
+```bash
+# 创建.env文件
+echo "DASHSCOPE_API_KEY=填你的阿里云百炼api-key" > .env
+```
+
+2. 使用docker-compose.yml:
+```bash
+# docker-compose.yml
+version: '3'
+services:
+  knowly:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+    volumes:
+      - ./File:/app/File
+      - ./temp_files:/app/temp_files
+      - ./VectorStore:/app/VectorStore
+    restart: unless-stopped
+```
+
+3. 启动服务:
+```bash
+docker-compose up -d
+```
+
+4. 查看日志:
+```bash
+docker-compose logs -f
+```
 
 ## 使用说明
 
@@ -279,6 +363,12 @@ A: 使用Ctrl+C关闭后等待5秒强制终止
 
 Q: 文档列表不更新？
 A: 点击刷新按钮或切换分页触发更新
+
+Q: Docker 容器无法访问？
+A: 检查防火墙设置，确保8000端口已开放，并验证容器是否正常运行（docker ps）
+
+Q: 如何在Docker中持久化数据？
+A: 通过挂载卷实现数据持久化，默认会挂载三个目录：File、temp_files和VectorStore
 
 ---
 
